@@ -34,9 +34,12 @@
 %global _systemd_el   1
 %endif
 
+# We do not support any sles version less than 12, as there is not a sufficient
+# version of OpenJDK available to test against.
 %if 0%{?suse_version} >= 1210
 %global _with_systemd 1
 %global _systemd_sles 1
+%global _sles         1
 %endif
 
 %if 0%{?rhel} && 0%{?rhel} < 7
@@ -48,6 +51,13 @@
 %global _with_sysvinit 1
 %global _old_sles      1
 %endif
+
+# java 1.8.0 is available starting in fedora 20 and el 6
+# SLES 12 still only has java 1.7.0
+%if 0%{?fedora} >= 20 || 0%{?rhel} >= 6
+%global open_jdk          java-1.8.0-openjdk-headless
+%else
+%global open_jdk          java-1.7.0-openjdk
 
 # Use the alternate locations for things.
 %global _sysconfdir      /etc
@@ -64,6 +74,7 @@ BuildRoot:        %{_tmppath}/%{realname}-%{version}-%{release}-root-%(%{__id_u}
 Summary:          Puppet Labs - <%= EZBake::Config[:project] %>
 Vendor:           Puppet Labs <info@puppetlabs.com>
 License:          PL Commercial
+License:          ASL 2.0
 
 URL:              http://puppetlabs.com
 Source0:          %{name}-%{realversion}.tar.gz
@@ -82,6 +93,7 @@ AutoReq:          0
 AutoProv:         0
 
 BuildRequires:    puppet-agent
+BuildRequires:    ruby
 BuildRequires:    /usr/sbin/useradd
 %if %{_with_systemd}
 BuildRequires:    systemd
@@ -106,6 +118,7 @@ Requires(postun): systemd
 Requires:         pe-java
 Requires:         pe-puppet-enterprise-release
 Requires:         bash
+Requires:         %{open_jdk}
 # net-tools is required for netstat usage in service unit file
 # See: https://tickets.puppetlabs.com/browse/SERVER-338
 Requires:         net-tools

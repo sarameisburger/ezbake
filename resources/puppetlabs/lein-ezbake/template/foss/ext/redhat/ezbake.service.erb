@@ -2,6 +2,12 @@
 Description=<%= EZBake::Config[:project] %> Service
 After=syslog.target network.target
 
+<% if EZBAKE::Config[:build_target] == 'foss' -%>
+After=syslog.target network.target
+<% elsif EZBAKE::Config[:build_target] == 'pe' -%>
+After=syslog.target network.target <%= EZBake::Config[:start_after].map {|dep| "#{dep}.service" }.join(" ") %>
+<% end -%>
+
 [Service]
 Type=forking
 EnvironmentFile=/etc/sysconfig/<%= EZBake::Config[:project] %>
